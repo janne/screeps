@@ -1,4 +1,5 @@
 import { ErrorMapper } from "utils/ErrorMapper";
+import { run as runBuilder } from "roles/builder";
 import { run as runHarvester } from "roles/harvester";
 import { run as runUpgrader } from "roles/upgrader";
 
@@ -12,8 +13,9 @@ const spawnIfNeeded = (role: string, count: number) => {
   const creeps = _.filter(Game.creeps, creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
-    console.log(`Spawning new ${role}: ${newName}`);
-    Game.spawns.Spawn1.spawnCreep(recipes[role], newName, { memory: { role } });
+    if (Game.spawns.Spawn1.spawnCreep(recipes[role], newName, { memory: { role } }) === OK) {
+      console.log(`Spawning new ${role}: ${newName}`);
+    }
   }
 };
 
@@ -47,6 +49,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
         return runHarvester(creep);
       case "upgrader":
         return runUpgrader(creep);
+      case "builder":
+        return runBuilder(creep);
     }
   });
 });

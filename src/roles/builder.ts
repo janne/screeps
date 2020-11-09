@@ -1,7 +1,7 @@
 import { harvest } from "utils/harvest";
 import { setWorkMode } from "utils/setWorkMode";
 
-export const builder = (creep: Creep): void => {
+export const run = (creep: Creep): void => {
   setWorkMode(creep, "🚧 building");
   if (creep.memory.working) {
     const targets = creep.room.find(FIND_CONSTRUCTION_SITES);
