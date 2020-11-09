@@ -1,6 +1,8 @@
+type WORK_MODE = "harvesting" | "transferring" | "working";
+
 interface CreepMemory {
   role: string;
-  working?: boolean;
+  workMode: WORK_MODE;
 }
 
 interface Memory {

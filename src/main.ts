@@ -1,10 +1,8 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { run as runBuilder } from "roles/builder";
-import { run as runHarvester } from "roles/harvester";
 import { run as runUpgrader } from "roles/upgrader";
 
 const recipes: { [key: string]: BodyPartConstant[] } = {
-  harvester: [WORK, CARRY, MOVE],
   upgrader: [WORK, CARRY, MOVE],
   builder: [WORK, CARRY, MOVE]
 };
@@ -13,7 +11,7 @@ const spawnIfNeeded = (role: string, count: number) => {
   const creeps = _.filter(Game.creeps, creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
-    if (Game.spawns.Spawn1.spawnCreep(recipes[role], newName, { memory: { role } }) === OK) {
+    if (Game.spawns.Spawn1.spawnCreep(recipes[role], newName, { memory: { role, workMode: "harvesting" } }) === OK) {
       console.log(`Spawning new ${role}: ${newName}`);
     }
   }
@@ -29,9 +27,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
     }
   });
 
-  spawnIfNeeded("harvester", 3);
-  spawnIfNeeded("upgrader", 1);
-  spawnIfNeeded("builder", 1);
+  spawnIfNeeded("upgrader", 2);
+  spawnIfNeeded("builder", 2);
 
   if (Game.spawns.Spawn1.spawning) {
     const spawningCreep = Game.creeps[Game.spawns.Spawn1.spawning.name];
@@ -45,8 +42,6 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
   Object.values(Game.creeps).forEach(creep => {
     switch (creep.memory.role) {
-      case "harvester":
-        return runHarvester(creep);
       case "upgrader":
         return runUpgrader(creep);
       case "builder":
