@@ -1,11 +1,13 @@
-type WORK_MODE = "harvesting" | "transferring" | "working";
+import { Task } from "utils/getTask";
 
-interface CreepMemory {
-  role: string;
-  workMode: WORK_MODE;
-}
+declare global {
+  export interface CreepMemory {
+    role: string;
+    task: Task | null;
+  }
 
-interface Memory {
-  uuid: number;
-  log: any;
+  export interface Memory {
+    uuid: number;
+    log: any;
+  }
 }
