@@ -1,4 +1,3 @@
-import { findTransferTargets } from "./findTransferTargets";
 import { randomElement } from "./randomElement";
 
 export interface HarvestTask {
@@ -25,18 +24,30 @@ export interface BuildTask {
   targetId: Id<ConstructionSite>;
 }
 
-export type Task = HarvestTask | TransferTask | UpgradeControllerTask | BuildTask;
+export interface RepairTask {
+  name: "repair";
+  say: string;
+  targetId: Id<AnyStructure>;
+}
+
+export type Task = HarvestTask | TransferTask | UpgradeControllerTask | BuildTask | RepairTask;
 
 export const getTask = (creep: Creep): Task | null => {
   // If no cargo, go harvest
-  const harvestTarget = creep.room.find(FIND_SOURCES)[0];
+  const harvestTarget = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
   if (creep.store.getUsedCapacity() === 0 && harvestTarget) {
     return { name: "harvest", say: "Harvesting", targetId: harvestTarget.id };
   }
 
   // Generate potential tasks
   const potentialTasks: Task[] = [];
-  const transferTarget = randomElement(findTransferTargets(creep));
+  const transferTarget = randomElement(
+    creep.room.find(FIND_STRUCTURES, {
+      filter: structure =>
+        (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+    })
+  ) as StructureExtension | StructureSpawn;
   if (transferTarget) {
     potentialTasks.push({ name: "transfer", say: "Transfering", targetId: transferTarget.id });
   }
@@ -46,6 +57,14 @@ export const getTask = (creep: Creep): Task | null => {
   const constructionTarget = randomElement(creep.room.find(FIND_CONSTRUCTION_SITES));
   if (constructionTarget) {
     potentialTasks.push({ name: "build", say: "Building", targetId: constructionTarget.id });
+  }
+  const wallTarget = creep.room
+    .find(FIND_STRUCTURES, {
+      filter: structure => structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART
+    })
+    .sort((a, b) => a.hits - b.hits)[0];
+  if (wallTarget) {
+    potentialTasks.push({ name: "repair", say: "Repair wall", targetId: wallTarget.id });
   }
 
   // Return random task

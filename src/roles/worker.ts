@@ -33,5 +33,13 @@ export const run = (creep: Creep): boolean => {
       }
       return creep.store.getUsedCapacity() > 0 && target.progress < target.progressTotal;
     }
+    case "repair": {
+      const target = Game.getObjectById(creep.memory.task.targetId);
+      if (!target) return false;
+      if (creep.repair(target) === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+      }
+      return creep.store.getUsedCapacity() > 0;
+    }
   }
 };
