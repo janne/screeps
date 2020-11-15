@@ -39,7 +39,7 @@ export const run = (creep: Creep): boolean => {
       if (creep.repair(target) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
       }
-      return creep.store.getUsedCapacity() > 0;
+      return creep.store.getUsedCapacity() > 0 && target.hits < target.hitsMax;
     }
   }
 };

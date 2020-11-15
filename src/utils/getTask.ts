@@ -60,11 +60,13 @@ export const getTask = (creep: Creep): Task | null => {
   }
   const wallTarget = creep.room
     .find(FIND_STRUCTURES, {
-      filter: structure => structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART
+      filter: structure =>
+        (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) &&
+        structure.hits < structure.hitsMax
     })
     .sort((a, b) => a.hits - b.hits)[0];
   if (wallTarget) {
-    potentialTasks.push({ name: "repair", say: "Repair wall", targetId: wallTarget.id });
+    potentialTasks.push({ name: "repair", say: "Repair", targetId: wallTarget.id });
   }
 
   // Return random task
