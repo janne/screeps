@@ -62,7 +62,8 @@ export const getTask = (creep: Creep): Task | null => {
     .find(FIND_STRUCTURES, {
       filter: structure =>
         (structure.structureType === STRUCTURE_WALL || structure.structureType === STRUCTURE_RAMPART) &&
-        structure.hits < structure.hitsMax
+        structure.hits < structure.hitsMax &&
+        structure.hits < 1_000_000
     })
     .sort((a, b) => a.hits - b.hits)[0];
   if (wallTarget) {
