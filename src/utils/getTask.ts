@@ -34,7 +34,7 @@ export type Task = HarvestTask | TransferTask | UpgradeControllerTask | BuildTas
 
 export const getTask = (creep: Creep): Task | null => {
   // If no cargo, go harvest
-  const harvestTarget = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
+  const harvestTarget = randomElement(creep.room.find(FIND_SOURCES_ACTIVE));
   if (creep.store.getUsedCapacity() === 0 && harvestTarget) {
     return { name: "harvest", say: "Harvesting", targetId: harvestTarget.id };
   }

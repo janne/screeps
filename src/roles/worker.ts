@@ -5,9 +5,19 @@ export const run = (creep: Creep): boolean => {
       const target = Game.getObjectById(creep.memory.task.targetId);
       if (!target) return false;
       if (creep.harvest(target) === ERR_NOT_IN_RANGE) {
-        creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
+        if (creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } }) === ERR_NO_PATH) {
+          creep.memory.errNoPath = creep.memory.errNoPath ? creep.memory.errNoPath + 1 : 1;
+          if (creep.memory.errNoPath > 3) {
+            creep.memory.errNoPath = 0;
+            return false;
+          }
+        }
       }
-      return creep.store.getFreeCapacity() > 0;
+      const moreWork = creep.store.getFreeCapacity() > 0;
+      if (!moreWork) {
+        creep.moveTo(Game.spawns.Spawn1);
+      }
+      return moreWork;
     }
     case "transfer": {
       const target = Game.getObjectById(creep.memory.task.targetId);

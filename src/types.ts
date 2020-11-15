@@ -4,6 +4,7 @@ declare global {
   export interface CreepMemory {
     role: string;
     task: Task | null;
+    errNoPath?: number;
   }
 
   export interface Memory {
