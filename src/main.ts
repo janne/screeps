@@ -20,7 +20,7 @@ const spawnIfNeeded = (role: string, count: number) => {
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
   // Automatically delete memory of missing creeps
-  Object.keys(Memory.creeps).forEach(name => {
+  Object.keys(Memory.creeps || []).forEach(name => {
     if (!(name in Game.creeps)) {
       delete Memory.creeps[name];
     }
