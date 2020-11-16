@@ -1,42 +1,48 @@
 import { randomElement } from "./randomElement";
 
-export interface HarvestTask {
-  name: "harvest";
+interface BaseTask {
   say: string;
+}
+
+export interface HarvestTask extends BaseTask {
+  name: "harvest";
+  attempts: number;
   targetId: Id<Source>;
 }
 
-export interface TransferTask {
+export interface TransferTask extends BaseTask {
   name: "transfer";
-  say: string;
   targetId: Id<StructureExtension | StructureSpawn>;
 }
 
-export interface UpgradeControllerTask {
+export interface UpgradeControllerTask extends BaseTask {
   name: "upgradeController";
-  say: string;
   targetId: Id<StructureController>;
 }
 
-export interface BuildTask {
+export interface BuildTask extends BaseTask {
   name: "build";
-  say: string;
   targetId: Id<ConstructionSite>;
 }
 
-export interface RepairTask {
+export interface RepairTask extends BaseTask {
   name: "repair";
-  say: string;
   targetId: Id<AnyStructure>;
 }
 
-export type Task = HarvestTask | TransferTask | UpgradeControllerTask | BuildTask | RepairTask;
+export interface MoveTask extends BaseTask {
+  name: "move";
+  targetId: Id<AnyStructure>;
+  attempts: number;
+}
+
+export type Task = HarvestTask | TransferTask | UpgradeControllerTask | BuildTask | RepairTask | MoveTask;
 
 export const getTask = (creep: Creep): Task | null => {
   // If no cargo, go harvest
   const harvestTarget = randomElement(creep.room.find(FIND_SOURCES_ACTIVE));
   if (creep.store.getUsedCapacity() === 0 && harvestTarget) {
-    return { name: "harvest", say: "Harvesting", targetId: harvestTarget.id };
+    return { name: "harvest", say: "Harvesting", targetId: harvestTarget.id, attempts: 5 };
   }
 
   // Generate potential tasks
