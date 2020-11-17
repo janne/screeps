@@ -7,13 +7,12 @@ export const run = (creep: Creep): boolean => {
       if (creep.harvest(target) === ERR_NOT_IN_RANGE) {
         if (creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } }) === ERR_NO_PATH) {
           creep.memory.task.attempts -= 1;
-          if (creep.memory.task.attempts === 0) {
-            return false;
-          }
+          return creep.memory.task.attempts > 0;
         }
       }
       if (creep.store.getFreeCapacity() === 0) {
-        creep.memory.task = { name: "move", say: "Away!", targetId: Game.spawns.Spawn1.id, attempts: 3 };
+        creep.memory.task = { name: "move", say: "Away!", targetId: Game.spawns.Spawn1.id, attempts: 5 };
+        creep.say(creep.memory.task.say);
       }
       return true;
     }
@@ -54,7 +53,7 @@ export const run = (creep: Creep): boolean => {
       if (!target) return false;
       creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
       creep.memory.task.attempts -= 1;
-      return creep.memory.task.attempts > 0;
+      return creep.memory.task.attempts >= 0;
     }
   }
 };
