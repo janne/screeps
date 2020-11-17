@@ -1,17 +1,23 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import { run as runWorker } from "roles/worker";
 import { getTask } from "utils/getTask";
+import { run as runWorker } from "roles/worker";
 
 const recipes: { [key: string]: BodyPartConstant[] } = {
   worker: [WORK, CARRY, MOVE]
 };
 
+const getRecipe = (role: string, level: number) =>
+  _.flatten(recipes[role].map(r => Array<BodyPartConstant>(level).fill(r)));
+
 const spawnIfNeeded = (role: string, count: number) => {
   const creeps = _.filter(Game.creeps, creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
-    if (Game.spawns.Spawn1.spawnCreep(recipes[role], newName, { memory: { role, task: null } }) === OK) {
-      console.log(`Spawning new ${role}: ${newName}`);
+    const recipe = [5, 4, 3, 2, 1]
+      .map(level => getRecipe(role, level))
+      .find(r => Game.spawns.Spawn1.spawnCreep(r, newName, { memory: { role, task: null } }) === OK);
+    if (recipe) {
+      console.log(`Spawning new ${role}: ${newName} of length ${recipe.length}`);
     }
   }
 };
