@@ -13,10 +13,12 @@ const spawnIfNeeded = (role: string, count: number) => {
   const creeps = _.filter(Game.creeps, creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
-    const recipe = [5, 4, 3, 2, 1]
-      .map(level => getRecipe(role, level))
-      .find(r => Game.spawns.Spawn1.spawnCreep(r, newName, { memory: { role, task: null } }) === OK);
-    if (recipe) {
+    const extCount = Game.spawns.Spawn1.room.find(FIND_STRUCTURES, {
+      filter: structure => structure.structureType === STRUCTURE_EXTENSION
+    }).length;
+    const totalEnergy = 300 + extCount * 50;
+    const recipe = getRecipe(role, Math.floor(totalEnergy / 200));
+    if (Game.spawns.Spawn1.spawnCreep(recipe, newName, { memory: { role, task: null } }) === OK) {
       console.log(`Spawning new ${role}: ${newName} of length ${recipe.length}`);
     }
   }
