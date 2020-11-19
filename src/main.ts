@@ -24,6 +24,16 @@ const spawnIfNeeded = (role: string, count: number) => {
   }
 };
 
+function defendRoom(room: Room) {
+  const hostiles = room.find(FIND_HOSTILE_CREEPS);
+  if (hostiles.length > 0) {
+    const username = hostiles[0].owner.username;
+    Game.notify(`User ${username} spotted in room ${room.name}`);
+    const towers = room.find<StructureTower>(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_TOWER } });
+    towers.forEach(tower => tower.attack(hostiles[0]));
+  }
+}
+
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
 export const loop = ErrorMapper.wrapLoop(() => {
@@ -33,6 +43,8 @@ export const loop = ErrorMapper.wrapLoop(() => {
       delete Memory.creeps[name];
     }
   });
+
+  Object.values(Game.rooms).forEach(defendRoom);
 
   spawnIfNeeded("worker", 10);
 
