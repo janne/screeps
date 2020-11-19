@@ -57,25 +57,27 @@ export const getTask = (creep: Creep): Task | null => {
   if (transferTarget) {
     potentialTasks.push({ name: "transfer", say: "Transfering", targetId: transferTarget.id });
   }
-  if (creep.room.controller) {
-    potentialTasks.push({ name: "upgradeController", say: "Upgrading", targetId: creep.room.controller.id });
-  }
-  const constructionTarget = randomElement(creep.room.find(FIND_CONSTRUCTION_SITES));
-  if (constructionTarget) {
-    potentialTasks.push({ name: "build", say: "Building", targetId: constructionTarget.id });
-  }
-  const wallTarget = creep.room
-    .find(FIND_STRUCTURES, {
-      filter: structure =>
-        (structure.structureType === STRUCTURE_WALL ||
-          structure.structureType === STRUCTURE_ROAD ||
-          structure.structureType === STRUCTURE_RAMPART) &&
-        structure.hits < structure.hitsMax &&
-        structure.hits < 1_000_000
-    })
-    .sort((a, b) => a.hits - b.hits)[0];
-  if (wallTarget) {
-    potentialTasks.push({ name: "repair", say: "Repair", targetId: wallTarget.id });
+  if (Object.values(Game.creeps).length > 3) {
+    if (creep.room.controller) {
+      potentialTasks.push({ name: "upgradeController", say: "Upgrading", targetId: creep.room.controller.id });
+    }
+    const constructionTarget = randomElement(creep.room.find(FIND_CONSTRUCTION_SITES));
+    if (constructionTarget) {
+      potentialTasks.push({ name: "build", say: "Building", targetId: constructionTarget.id });
+    }
+    const wallTarget = creep.room
+      .find(FIND_STRUCTURES, {
+        filter: structure =>
+          (structure.structureType === STRUCTURE_WALL ||
+            structure.structureType === STRUCTURE_ROAD ||
+            structure.structureType === STRUCTURE_RAMPART) &&
+          structure.hits < structure.hitsMax &&
+          structure.hits < 1_000_000
+      })
+      .sort((a, b) => a.hits - b.hits)[0];
+    if (wallTarget) {
+      potentialTasks.push({ name: "repair", say: "Repair", targetId: wallTarget.id });
+    }
   }
 
   // Return random task
