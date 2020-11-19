@@ -38,6 +38,31 @@ export interface MoveTask extends BaseTask {
 
 export type Task = HarvestTask | TransferTask | UpgradeControllerTask | BuildTask | RepairTask | MoveTask;
 
+export const getTransferTarget = (creep: Creep) =>
+  randomElement(
+    creep.room.find<StructureExtension | StructureSpawn>(FIND_STRUCTURES, {
+      filter: structure =>
+        (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+    })
+  );
+
+export const getRepairTarget = (creep: Creep) =>
+  creep.room
+    .find(FIND_STRUCTURES, {
+      filter: structure =>
+        (structure.structureType === STRUCTURE_WALL ||
+          structure.structureType === STRUCTURE_ROAD ||
+          structure.structureType === STRUCTURE_RAMPART) &&
+        structure.hits < structure.hitsMax &&
+        structure.hits < 1_000_000
+    })
+    .sort((a, b) => a.hits - b.hits)[0];
+
+export const getBuildTarget = (creep: Creep) => randomElement(creep.room.find(FIND_CONSTRUCTION_SITES));
+
+export const hasMoreEnergy = (creep: Creep) => creep.store.getUsedCapacity() > 0;
+
 export const getTask = (creep: Creep): Task | null => {
   // If no cargo, go harvest
   const harvestTarget = randomElement(creep.room.find(FIND_SOURCES_ACTIVE));
@@ -47,13 +72,7 @@ export const getTask = (creep: Creep): Task | null => {
 
   // Generate potential tasks
   const potentialTasks: Task[] = [];
-  const transferTarget = randomElement(
-    creep.room.find(FIND_STRUCTURES, {
-      filter: structure =>
-        (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
-        structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
-    })
-  ) as StructureExtension | StructureSpawn;
+  const transferTarget = getTransferTarget(creep);
   if (transferTarget) {
     potentialTasks.push({ name: "transfer", say: "Transfering", targetId: transferTarget.id });
   }
@@ -61,22 +80,13 @@ export const getTask = (creep: Creep): Task | null => {
     if (creep.room.controller) {
       potentialTasks.push({ name: "upgradeController", say: "Upgrading", targetId: creep.room.controller.id });
     }
-    const constructionTarget = randomElement(creep.room.find(FIND_CONSTRUCTION_SITES));
-    if (constructionTarget) {
-      potentialTasks.push({ name: "build", say: "Building", targetId: constructionTarget.id });
+    const buildTarget = getBuildTarget(creep);
+    if (buildTarget) {
+      potentialTasks.push({ name: "build", say: "Building", targetId: buildTarget.id });
     }
-    const wallTarget = creep.room
-      .find(FIND_STRUCTURES, {
-        filter: structure =>
-          (structure.structureType === STRUCTURE_WALL ||
-            structure.structureType === STRUCTURE_ROAD ||
-            structure.structureType === STRUCTURE_RAMPART) &&
-          structure.hits < structure.hitsMax &&
-          structure.hits < 1_000_000
-      })
-      .sort((a, b) => a.hits - b.hits)[0];
-    if (wallTarget) {
-      potentialTasks.push({ name: "repair", say: "Repair", targetId: wallTarget.id });
+    const repairTarget = getRepairTarget(creep);
+    if (repairTarget) {
+      potentialTasks.push({ name: "repair", say: "Repair", targetId: repairTarget.id });
     }
   }
 

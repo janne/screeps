@@ -1,3 +1,5 @@
+import { getBuildTarget, getRepairTarget, getTransferTarget, hasMoreEnergy } from "utils/getTask";
+
 export const run = (creep: Creep): boolean => {
   if (!creep.memory.task) return false;
   switch (creep.memory.task.name) {
@@ -10,7 +12,7 @@ export const run = (creep: Creep): boolean => {
           return creep.memory.task.attempts > 0;
         }
       }
-      if (creep.store.getFreeCapacity() === 0) {
+      if (creep.store.getFreeCapacity() === 0 || target.energy === 0) {
         creep.memory.task = { name: "move", say: "Away!", targetId: Game.spawns.Spawn1.id, attempts: 5 };
         creep.say(creep.memory.task.say);
       }
@@ -22,7 +24,14 @@ export const run = (creep: Creep): boolean => {
       if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
       }
-      return target.store.getFreeCapacity(RESOURCE_ENERGY) > 0 && creep.store.getUsedCapacity() > 0;
+      if (target.store.getFreeCapacity(RESOURCE_ENERGY) === 0 && hasMoreEnergy(creep)) {
+        const newTarget = getTransferTarget(creep);
+        if (newTarget) {
+          creep.memory.task.targetId = newTarget.id;
+          return true;
+        }
+      }
+      return target.store.getFreeCapacity(RESOURCE_ENERGY) > 0 && hasMoreEnergy(creep);
     }
     case "upgradeController": {
       const target = Game.getObjectById(creep.memory.task.targetId);
@@ -30,7 +39,7 @@ export const run = (creep: Creep): boolean => {
       if (creep.upgradeController(target) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
       }
-      return creep.store.getUsedCapacity() > 0;
+      return hasMoreEnergy(creep);
     }
     case "build": {
       const target = Game.getObjectById(creep.memory.task.targetId);
@@ -38,7 +47,14 @@ export const run = (creep: Creep): boolean => {
       if (creep.build(target) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
       }
-      return creep.store.getUsedCapacity() > 0 && target.progress < target.progressTotal;
+      if (hasMoreEnergy(creep) && target.progress === target.progressTotal) {
+        const newTarget = getBuildTarget(creep);
+        if (newTarget) {
+          creep.memory.task.targetId = newTarget.id;
+          return true;
+        }
+      }
+      return hasMoreEnergy(creep) && target.progress < target.progressTotal;
     }
     case "repair": {
       const target = Game.getObjectById(creep.memory.task.targetId);
@@ -46,7 +62,14 @@ export const run = (creep: Creep): boolean => {
       if (creep.repair(target) === ERR_NOT_IN_RANGE) {
         creep.moveTo(target, { visualizePathStyle: { stroke: "#ffffff" } });
       }
-      return creep.store.getUsedCapacity() > 0 && target.hits < target.hitsMax;
+      if (hasMoreEnergy(creep) && target.hits === target.hitsMax) {
+        const newTarget = getRepairTarget(creep);
+        if (newTarget) {
+          creep.memory.task.targetId = newTarget.id;
+          return true;
+        }
+      }
+      return hasMoreEnergy(creep) && target.hits < target.hitsMax;
     }
     case "move": {
       const target = Game.getObjectById(creep.memory.task.targetId);
