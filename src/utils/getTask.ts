@@ -57,7 +57,7 @@ export const getRepairTarget = (creep: Creep) =>
           structure.structureType === STRUCTURE_ROAD ||
           structure.structureType === STRUCTURE_RAMPART) &&
         structure.hits < structure.hitsMax &&
-        structure.hits < 1_000_000
+        structure.hits < 10_000_000
     })
     .sort((a, b) => a.hits - b.hits)[0];
 
