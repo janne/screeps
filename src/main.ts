@@ -11,16 +11,16 @@ const recipes: { [key: string]: BodyPartConstant[] } = {
 const getRecipe = (role: string, level: number) =>
   _.flatten(recipes[role].map(r => Array<BodyPartConstant>(level).fill(r)));
 
-const spawnIfNeeded = (role: Role, count: number) => {
-  const creeps = _.filter(Game.creeps, creep => creep.memory.role === role);
+const spawnIfNeeded = (spawn: StructureSpawn, role: string, count: number) => {
+  const creeps = spawn.room.find(FIND_MY_CREEPS).filter(creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
-    const extCount = Game.spawns.Spawn1.room.find(FIND_STRUCTURES, {
+    const extCount = spawn.room.find(FIND_STRUCTURES, {
       filter: structure => structure.structureType === STRUCTURE_EXTENSION
     }).length;
     const level = role === "worker" ? Math.floor((300 + extCount * 50) / 200) : 1;
     const recipe = getRecipe(role, level);
-    if (Game.spawns.Spawn1.spawnCreep(recipe, newName, { memory: { role, task: null } }) === OK) {
+    if (spawn.spawnCreep(recipe, newName, { memory: { role, task: null } }) === OK) {
       console.log(`Spawning new ${role}: ${newName} of length ${recipe.length}`);
     }
   }
@@ -49,19 +49,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
   Object.values(Game.rooms).forEach(defendRoom);
 
   if (Object.keys(Game.rooms).length < 2) {
-    spawnIfNeeded("claimer", 1);
+    spawnIfNeeded(Game.spawns.Spawn1, "claimer", 1);
   }
-  spawnIfNeeded("worker", 5);
-
-  if (Game.spawns.Spawn1.spawning) {
-    const spawningCreep = Game.creeps[Game.spawns.Spawn1.spawning.name];
-    Game.spawns.Spawn1.room.visual.text(
-      "🛠️" + spawningCreep.memory.role,
-      Game.spawns.Spawn1.pos.x + 1,
-      Game.spawns.Spawn1.pos.y,
-      { align: "left", opacity: 0.8 }
-    );
-  }
+  spawnIfNeeded(Game.spawns.Spawn1, "worker", 5);
+  spawnIfNeeded(Game.spawns.Spawn2, "worker", 5);
 
   Object.values(Game.creeps).forEach(creep => {
     switch (creep.memory.role) {

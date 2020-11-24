@@ -1,10 +1,8 @@
 import { Task } from "utils/getTask";
 
 declare global {
-  export type Role = "worker" | "claimer";
-
   export interface CreepMemory {
-    role: Role;
+    role: string;
     task: Task | null;
   }
 

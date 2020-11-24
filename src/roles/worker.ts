@@ -13,7 +13,9 @@ export const run = (creep: Creep): boolean => {
         }
       }
       if (creep.store.getFreeCapacity() === 0 || target.energy === 0) {
-        creep.memory.task = { name: "move", say: "Away!", targetId: Game.spawns.Spawn1.id, attempts: 5 };
+        const controller = creep.room.controller;
+        if (!controller) return false;
+        creep.memory.task = { name: "move", say: "Away!", targetId: controller.id, attempts: 5 };
         creep.say(creep.memory.task.say);
       }
       return true;
