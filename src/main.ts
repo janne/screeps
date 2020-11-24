@@ -1,7 +1,7 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { getTask } from "utils/getTask";
-import { run as runWorker } from "roles/worker";
 import { run as runClaimer } from "roles/claimer";
+import { run as runWorker } from "roles/worker";
 
 const recipes: { [key: string]: BodyPartConstant[] } = {
   worker: [WORK, CARRY, MOVE],
@@ -12,6 +12,7 @@ const getRecipe = (role: string, level: number) =>
   _.flatten(recipes[role].map(r => Array<BodyPartConstant>(level).fill(r)));
 
 const spawnIfNeeded = (spawn: StructureSpawn, role: string, count: number) => {
+  if (!spawn) return;
   const creeps = spawn.room.find(FIND_MY_CREEPS).filter(creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
