@@ -1,23 +1,25 @@
 import { ErrorMapper } from "utils/ErrorMapper";
 import { getTask } from "utils/getTask";
 import { run as runWorker } from "roles/worker";
+import { run as runClaimer } from "roles/claimer";
 
 const recipes: { [key: string]: BodyPartConstant[] } = {
-  worker: [WORK, CARRY, MOVE]
+  worker: [WORK, CARRY, MOVE],
+  claimer: [CLAIM, MOVE]
 };
 
 const getRecipe = (role: string, level: number) =>
   _.flatten(recipes[role].map(r => Array<BodyPartConstant>(level).fill(r)));
 
-const spawnIfNeeded = (role: string, count: number) => {
+const spawnIfNeeded = (role: Role, count: number) => {
   const creeps = _.filter(Game.creeps, creep => creep.memory.role === role);
   if (creeps.length < count) {
     const newName = `${role}${Game.time}`;
     const extCount = Game.spawns.Spawn1.room.find(FIND_STRUCTURES, {
       filter: structure => structure.structureType === STRUCTURE_EXTENSION
     }).length;
-    const totalEnergy = 300 + extCount * 50;
-    const recipe = getRecipe(role, Math.floor(totalEnergy / 200));
+    const level = role === "worker" ? Math.floor((300 + extCount * 50) / 200) : 1;
+    const recipe = getRecipe(role, level);
     if (Game.spawns.Spawn1.spawnCreep(recipe, newName, { memory: { role, task: null } }) === OK) {
       console.log(`Spawning new ${role}: ${newName} of length ${recipe.length}`);
     }
@@ -46,7 +48,10 @@ export const loop = ErrorMapper.wrapLoop(() => {
 
   Object.values(Game.rooms).forEach(defendRoom);
 
-  spawnIfNeeded("worker", 10);
+  if (Object.keys(Game.rooms).length < 2) {
+    spawnIfNeeded("claimer", 1);
+  }
+  spawnIfNeeded("worker", 5);
 
   if (Game.spawns.Spawn1.spawning) {
     const spawningCreep = Game.creeps[Game.spawns.Spawn1.spawning.name];
@@ -65,6 +70,9 @@ export const loop = ErrorMapper.wrapLoop(() => {
           creep.memory.task = getTask(creep);
         }
         break;
+      }
+      case "claimer": {
+        runClaimer(creep);
       }
     }
   });
