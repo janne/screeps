@@ -92,6 +92,13 @@ export const getTask = (creep: Creep): Task | null => {
     }
   }
 
+  if (potentialTasks.length === 0) {
+    const buildTarget = getBuildTarget(creep);
+    if (buildTarget) {
+      return { name: "build", say: "Building", targetId: buildTarget.id };
+    }
+  }
+
   // Return random task
   const task = randomElement(potentialTasks);
   if (task === null) return null;
