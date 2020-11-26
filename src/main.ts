@@ -53,7 +53,7 @@ export const loop = ErrorMapper.wrapLoop(() => {
     spawnIfNeeded(Game.spawns.Spawn1, "claimer", 1);
   }
   spawnIfNeeded(Game.spawns.Spawn1, "worker", 5);
-  spawnIfNeeded(Game.spawns.Spawn2, "worker", 5);
+  spawnIfNeeded(Game.spawns.Spawn2, "worker", 10);
 
   Object.values(Game.creeps).forEach(creep => {
     switch (creep.memory.role) {
