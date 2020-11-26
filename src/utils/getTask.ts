@@ -61,7 +61,12 @@ export const getRepairTarget = (creep: Creep) =>
     })
     .sort((a, b) => a.hits - b.hits)[0];
 
-export const getBuildTarget = (creep: Creep) => randomElement(creep.room.find(FIND_CONSTRUCTION_SITES));
+export const getBuildTarget = (creep: Creep) => {
+  const sites = creep.room.find(FIND_CONSTRUCTION_SITES);
+  const extension = sites.find(site => site.structureType === STRUCTURE_EXTENSION);
+  if (extension) return extension;
+  return sites.sort((a, b) => b.progress - a.progress)[0];
+};
 
 export const hasMoreEnergy = (creep: Creep) => creep.store.getUsedCapacity() > 0;
 
