@@ -70,6 +70,11 @@ export const getBuildTarget = (creep: Creep) => {
 
 export const hasMoreEnergy = (creep: Creep) => creep.store.getUsedCapacity() > 0;
 
+const checkRoom = (room: Room): UpgradeControllerTask | null => {
+  if (!room.controller || room.find(FIND_MY_CREEPS).length > 0) return null;
+  return { name: "upgradeController", say: "Upgrading", targetId: room.controller.id };
+};
+
 export const getTask = (creep: Creep): Task | null => {
   // If no cargo, go harvest
   const harvestTarget = randomElement(creep.room.find(FIND_SOURCES_ACTIVE));
@@ -83,7 +88,12 @@ export const getTask = (creep: Creep): Task | null => {
   if (transferTarget) {
     potentialTasks.push({ name: "transfer", say: "Transfering", targetId: transferTarget.id });
   }
-  if (Object.values(Game.creeps).length > 3) {
+  const creeps = creep.room.find(FIND_MY_CREEPS);
+  if (creeps.length > 3) {
+    // Check if any emergency task
+    const emergencyTask = checkRoom(Game.rooms.W42N36);
+    if (emergencyTask) return emergencyTask;
+
     if (creep.room.controller) {
       potentialTasks.push({ name: "upgradeController", say: "Upgrading", targetId: creep.room.controller.id });
     }
